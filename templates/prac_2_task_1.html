@@ -17,11 +17,11 @@
     <form class="mt-5" method="post">
         <h1>Введіть Обсяг палива:</h1>
 
-        <!-- Введення даних для кожного компонента палива -->
+        <!-- Введення даних для кожного палива -->
         <div class="input-container mx-auto" style="max-width: 30rem;">
 
-            <!-- Поле для введення даних для одного компонента
-             Інші поля виглядають так само, змінюється тільки назва компонента -->
+            <!-- Поле для введення даних для одного вугілля
+             Інші поля виглядають так само, змінюється тільки назва палива -->
             <div class="input-group mt-3 mb-3">
                 <label class="input-group-text fs-4 me-2">Вугілля, т</label>
                 <input type="text" name="coal" class="form-control" placeholder="Введіть значення..." aria-label="Hp"
@@ -40,66 +40,54 @@
                        required>
             </div>
 
+            <!-- Кнопка, що дає можливість змінити консанти при розрахунках -->
             <a class="btn btn-primary mb-3" data-bs-toggle="collapse" href="#collapseDiv" role="button"
                aria-expanded="false" aria-controls="collapseDiv">
                 <i class="fa-solid fa-arrow-down"></i> Змінити константи <i class="fa-solid fa-arrow-down"></i>
             </a>
 
+            <!-- Секція, що стане видимою при натисканні кнопки -->
             <div class="collapse" id="collapseDiv">
                 <div class="card card-body">
-                    <h3>Склад робочої маси вугілля, %</h3>
-                    <div class="input-group mt-3 mb-3">
-                        <label class="input-group-text fs-4 me-2">C<sup>p</sup></label>
-                        <input type="text" name="Cp" class="form-control" placeholder="Введіть значення..."
-                               aria-label="Cp" value="52,49" required>
-                    </div>
 
-                    <div class="input-group mt-3 mb-3">
-                        <label class="input-group-text fs-4 me-2">H<sup>p</sup></label>
-                        <input type="text" name="Hp" class="form-control" placeholder="Введіть значення..."
-                               aria-label="Hp" value="3,50" required>
-                    </div>
-
-                    <div class="input-group mt-3 mb-3">
-                        <label class="input-group-text fs-4 me-2">O<sup>p</sup></label>
-                        <input type="text" name="Op" class="form-control" placeholder="Введіть значення..."
-                               aria-label="Op" value="4,99" required>
-                    </div>
-
-                    <div class="input-group mt-3 mb-3">
-                        <label class="input-group-text fs-4 me-2">N<sup>p</sup></label>
-                        <input type="text" name="Np" class="form-control" placeholder="Введіть значення..."
-                               aria-label="Np" value="0,97" required>
-                    </div>
-
-                    <div class="input-group mt-3 mb-3">
-                        <label class="input-group-text fs-4 me-2">S<sup>p</sup></label>
-                        <input type="text" name="Sp" class="form-control" placeholder="Введіть значення..."
-                               aria-label="Sp" value="2,85" required>
-                    </div>
-
+                    <!-- Поле для введення даних для однієї константи
+                    Інші поля виглядають так само, змінюється тільки назва константи та значення за змовчуванням -->
                     <div class="input-group mt-3 mb-3">
                         <label class="input-group-text fs-4 me-2">A<sup>p</sup></label>
-                        <input type="text" name="Ap" class="form-control" placeholder="Введіть значення..."
+                        <input type="text" name="Ap" class="form-control" placeholder="Введіть значення для вугілля..."
                                aria-label="Ap" value="25,20" required>
                     </div>
 
                     <div class="input-group mt-3 mb-3">
-                        <label class="input-group-text fs-4 me-2">W<sup>p</sup></label>
-                        <input type="text" name="Wp" class="form-control" placeholder="Введіть значення..."
-                               aria-label="Wp" value="10,00" required>
-                    </div>
-
-                    <div class="input-group mt-3 mb-3">
-                        <label class="input-group-text fs-4 me-2">Vr</label>
-                        <input type="text" name="Vr" class="form-control" placeholder="Введіть значення..."
-                               aria-label="Vr" value="25,92" required>
-                    </div>
-
-                    <div class="input-group mt-3 mb-3">
                         <label class="input-group-text fs-4 me-2">Q<sup>p</sup></label>
-                        <input type="text" name="Qpi" class="form-control" placeholder="Введіть значення..."
+                        <input type="text" name="Qpi" class="form-control" placeholder="Введіть значення для вугілля..."
                                aria-label="Qpi" value="20,47" required>
+                    </div>
+
+                    <div class="input-group mt-3 mb-3">
+                        <label class="input-group-text fs-4 me-2">Q<sup>daf</sup></label>
+                        <input type="text" name="Qgi_oil" class="form-control"
+                               placeholder="Введіть значення для мазуту..."
+                               aria-label="Qdaf" value="40,40" required>
+                    </div>
+
+                    <div class="input-group mt-3 mb-3">
+                        <label class="input-group-text fs-4 me-2">W<sup>p</sup></label>
+                        <input type="text" name="Wp_oil" class="form-control"
+                               placeholder="Введіть значення для мазуту..."
+                               aria-label="Wp_oil" value="2" required>
+                    </div>
+
+                    <div class="input-group mt-3 mb-3">
+                        <label class="input-group-text fs-4 me-2">Г<sub>вин</sub></label>
+                        <input type="text" name="Gvun" class="form-control" placeholder="Введіть значення..."
+                               aria-label="Gvun" value="1,5" required>
+                    </div>
+
+                    <div class="input-group mt-3 mb-3">
+                        <label class="input-group-text fs-4 me-2">η<sub>зу</sub></label>
+                        <input type="text" name="nzu" class="form-control" placeholder="Введіть значення..."
+                               aria-label="nzu" value="0,985" required>
                     </div>
                 </div>
             </div>

@@ -151,49 +151,44 @@ def prac_1_task_2():
 def prac_2_task_1():
     if request.method == "POST":
         try:
-            nzu = 0.985
-
+            # Отримання користувацього вводу
+            # Також заміняємо ',' на '.' для коректного переведення строки у float
             coal = float(request.form.get("coal").replace(",", "."))
             oil = float(request.form.get("oil").replace(",", "."))
-            gas = float(request.form.get("gas").replace(",", "."))
+            # gas = float(request.form.get("gas").replace(",", "."))
 
-            Hp_coal = float(request.form.get("Hp").replace(",", "."))
-            Cp_coal = float(request.form.get("Cp").replace(",", "."))
-            Sp_coal = float(request.form.get("Sp").replace(",", "."))
-            Np_coal = float(request.form.get("Np").replace(",", "."))
-            Op_coal = float(request.form.get("Op").replace(",", "."))
-            Wp_coal = float(request.form.get("Wp").replace(",", "."))
+            # Також отримуємо константи, які може задати користувач
             Ap_coal = float(request.form.get("Ap").replace(",", "."))
-            Vr_coal = float(request.form.get("Vr").replace(",", "."))
             Qpi_coal = float(request.form.get("Qpi").replace(",", "."))
+            Qgi_oil = float(request.form.get("Qgi_oil").replace(",", "."))
+            Wp_oil = float(request.form.get("Wp_oil").replace(",", "."))
+            Gvun = float(request.form.get("Gvun").replace(",", "."))
+            nzu = float(request.form.get("nzu").replace(",", "."))
 
-            Gvun = 1.5
-            Gshl = 0.5
-
+            # Значення частки леткої золи для вугілля та мазуту, взяті з таблиці 2.1
             avun_coal = 0.8
+            avun_oil = 1
 
-            ktv_coal = math.pow(10, 6) / Qpi_coal * avun_coal * Ap_coal / (100 - Gvun) * (1 - nzu)
-            Etv_coal = math.pow(10, -6) * ktv_coal * Qpi_coal * coal
-
-            Sg_oil = 2.50
-            Cg_oil = 85.50
-            Hg_oil = 11.20
-            O_N_oil = 0.80
-            Qgi_oil = 40.40
-            Ac_oil = 0.15
-            Wp_oil = 2.00
-
+            # Шукаємо зольність та нижчу теплоту згоряння робочї маси для мазуту
             Ap_oil = (100 - Wp_oil) / 100
             Qri_oil = Qgi_oil * (100 - Wp_oil - Ap_oil) / 100 - 0.025 * Wp_oil
 
-            avun_oil = 1
+            # Обчислюємо показник емісії твердих частинок при спалюванні вугілля
+            # та валовий викид при спалюванні вугілля
+            ktv_coal = math.pow(10, 6) / Qpi_coal * avun_coal * Ap_coal / (100 - Gvun) * (1 - nzu)
+            Etv_coal = math.pow(10, -6) * ktv_coal * Qpi_coal * coal
 
+            # Обчислюємо показник емісії твердих частинок при спалюванні мазуту
+            # та валовий викид при спалюванні мазуту
             ktv_oil = math.pow(10, 6) / Qri_oil * avun_oil * Ap_oil / 100 * (1 - nzu)
             Etv_oil = math.pow(10, -6) * ktv_oil * Qri_oil * oil
 
+            # Оскільки при спалюванні природного газу тверді частинки відсутні,
+            # то показник емісії та валовий викид = 0
             ktv_gas = 0
             Etv_gas = 0
 
+            # Заносимо результати у словник та округлюємо їх
             results = {
                 'ktv_coal': round(ktv_coal, 2),
                 'Etv_coal': round(Etv_coal, 2),
@@ -203,9 +198,12 @@ def prac_2_task_1():
                 'Etv_gas': Etv_gas
             }
 
+        # Якщо в ході обрахунків виникає помилка, то повертаємо статус 400
+        # та виводимо помилку
         except Exception as e:
             return abort(400, f"Bad values: {e}")
 
+        # Рендеримо сторінку разом з результатами обрахунків
         return render_template("prac_2_task_1.html", results=results)
 
     return render_template("prac_2_task_1.html", results=None)
