@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+<!-- Спадкування від базового шаблону -->
+
+{% block head %}
+<title>Task 1</title>
+{% endblock %}
+
+{% block content %}
+<!-- Вміст головної сторінки -->
+
+<div class="pt-5 text-center">
+    <h1>Вітаємо у веб калькуляторі!</h1>
+    <h4>Цей калькулятор здатен: розрахувати валові викиди шкідливих речовин у вигляді суспендованих твердих частинок
+        при спалювані вугілля, мазуту та природного газу.</h4>
+
+    <!-- Створення форми для введення даних -->
+    <form class="mt-5" method="post">
+        <h1>Введіть Обсяг палива:</h1>
+
+        <!-- Введення даних для кожного компонента палива -->
+        <div class="input-container mx-auto" style="max-width: 30rem;">
+
+            <!-- Поле для введення даних для одного компонента
+             Інші поля виглядають так само, змінюється тільки назва компонента -->
+            <div class="input-group mt-3 mb-3">
+                <label class="input-group-text fs-4 me-2">Вугілля, т</label>
+                <input type="text" name="coal" class="form-control" placeholder="Введіть значення..." aria-label="Hp"
+                       required>
+            </div>
+
+            <div class="input-group mt-3 mb-3">
+                <label class="input-group-text fs-4 me-2">Мазут, т</label>
+                <input type="text" name="oil" class="form-control" placeholder="Введіть значення..." aria-label="Cp"
+                       required>
+            </div>
+
+            <div class="input-group mt-3 mb-3">
+                <label class="input-group-text fs-4 me-2">Природний газ, м<sup>3</sup></label>
+                <input type="text" name="gas" class="form-control" placeholder="Введіть значення..." aria-label="Sp"
+                       required>
+            </div>
+
+            <a class="btn btn-primary mb-3" data-bs-toggle="collapse" href="#collapseDiv" role="button"
+               aria-expanded="false" aria-controls="collapseDiv">
+                <i class="fa-solid fa-arrow-down"></i> Змінити константи <i class="fa-solid fa-arrow-down"></i>
+            </a>
+
+            <div class="collapse" id="collapseDiv">
+                <div class="card card-body">
+                    <h3>Склад робочої маси вугілля, %</h3>
+                    <div class="input-group mt-3 mb-3">
+                        <label class="input-group-text fs-4 me-2">C<sup>p</sup></label>
+                        <input type="text" name="Cp" class="form-control" placeholder="Введіть значення..."
+                               aria-label="Cp" value="52,49" required>
+                    </div>
+
+                    <div class="input-group mt-3 mb-3">
+                        <label class="input-group-text fs-4 me-2">H<sup>p</sup></label>
+                        <input type="text" name="Hp" class="form-control" placeholder="Введіть значення..."
+                               aria-label="Hp" value="3,50" required>
+                    </div>
+
+                    <div class="input-group mt-3 mb-3">
+                        <label class="input-group-text fs-4 me-2">O<sup>p</sup></label>
+                        <input type="text" name="Op" class="form-control" placeholder="Введіть значення..."
+                               aria-label="Op" value="4,99" required>
+                    </div>
+
+                    <div class="input-group mt-3 mb-3">
+                        <label class="input-group-text fs-4 me-2">N<sup>p</sup></label>
+                        <input type="text" name="Np" class="form-control" placeholder="Введіть значення..."
+                               aria-label="Np" value="0,97" required>
+                    </div>
+
+                    <div class="input-group mt-3 mb-3">
+                        <label class="input-group-text fs-4 me-2">S<sup>p</sup></label>
+                        <input type="text" name="Sp" class="form-control" placeholder="Введіть значення..."
+                               aria-label="Sp" value="2,85" required>
+                    </div>
+
+                    <div class="input-group mt-3 mb-3">
+                        <label class="input-group-text fs-4 me-2">A<sup>p</sup></label>
+                        <input type="text" name="Ap" class="form-control" placeholder="Введіть значення..."
+                               aria-label="Ap" value="25,20" required>
+                    </div>
+
+                    <div class="input-group mt-3 mb-3">
+                        <label class="input-group-text fs-4 me-2">W<sup>p</sup></label>
+                        <input type="text" name="Wp" class="form-control" placeholder="Введіть значення..."
+                               aria-label="Wp" value="10,00" required>
+                    </div>
+
+                    <div class="input-group mt-3 mb-3">
+                        <label class="input-group-text fs-4 me-2">Vr</label>
+                        <input type="text" name="Vr" class="form-control" placeholder="Введіть значення..."
+                               aria-label="Vr" value="25,92" required>
+                    </div>
+
+                    <div class="input-group mt-3 mb-3">
+                        <label class="input-group-text fs-4 me-2">Q<sup>p</sup></label>
+                        <input type="text" name="Qpi" class="form-control" placeholder="Введіть значення..."
+                               aria-label="Qpi" value="20,47" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <br>
+        <button type="submit" class="btn btn-lg btn-success">Розрахувати!</button>
+    </form>
+
+    <!-- Виведення результатів, якщо користувач надіслав дані за допомогою форми -->
+    {% if results %}
+    <h1>Результати:</h1>
+
+    <span class="d-block fs-4">1.1. Показник емісії твердих частинок при спалюванні вугілля становитиме: {{results.get("ktv_coal")}} г/ГДж;</span>
+    <span class="d-block fs-4">1.2. Валовий викид при спалюванні вугілля становитиме: {{results.get("Etv_coal")}} т.;</span>
+    <span class="d-block fs-4">1.3. Показник емісії твердих частинок при спалюванні мазуту становитиме: {{results.get("ktv_oil")}} г/ГДж;</span>
+    <span class="d-block fs-4">1.4. Валовий викид при спалюванні мазуту становитиме: {{results.get("Etv_oil")}} т.;</span>
+    <span class="d-block fs-4">1.5. Показник емісії твердих частинок при спалюванні природного газу становитиме: {{results.get("ktv_gas")}} г/ГДж;</span>
+    <span class="d-block fs-4">1.6. Валовий викид при спалюванні природного газу становитиме: {{results.get("Etv_gas")}} т.</span>
+    {% endif %}
+</div>
+{% endblock %}

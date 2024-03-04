@@ -1,3 +1,5 @@
+import math
+
 from flask import Flask, render_template, abort, request
 
 app = Flask(__name__)
@@ -143,6 +145,70 @@ def prac_1_task_2():
         return render_template("prac_1_task_2.html", results=results)
 
     return render_template("prac_1_task_2.html", results=None)
+
+
+@app.route("/prac-2/task-1", methods=["GET", "POST"])
+def prac_2_task_1():
+    if request.method == "POST":
+        try:
+            nzu = 0.985
+
+            coal = float(request.form.get("coal").replace(",", "."))
+            oil = float(request.form.get("oil").replace(",", "."))
+            gas = float(request.form.get("gas").replace(",", "."))
+
+            Hp_coal = float(request.form.get("Hp").replace(",", "."))
+            Cp_coal = float(request.form.get("Cp").replace(",", "."))
+            Sp_coal = float(request.form.get("Sp").replace(",", "."))
+            Np_coal = float(request.form.get("Np").replace(",", "."))
+            Op_coal = float(request.form.get("Op").replace(",", "."))
+            Wp_coal = float(request.form.get("Wp").replace(",", "."))
+            Ap_coal = float(request.form.get("Ap").replace(",", "."))
+            Vr_coal = float(request.form.get("Vr").replace(",", "."))
+            Qpi_coal = float(request.form.get("Qpi").replace(",", "."))
+
+            Gvun = 1.5
+            Gshl = 0.5
+
+            avun_coal = 0.8
+
+            ktv_coal = math.pow(10, 6) / Qpi_coal * avun_coal * Ap_coal / (100 - Gvun) * (1 - nzu)
+            Etv_coal = math.pow(10, -6) * ktv_coal * Qpi_coal * coal
+
+            Sg_oil = 2.50
+            Cg_oil = 85.50
+            Hg_oil = 11.20
+            O_N_oil = 0.80
+            Qgi_oil = 40.40
+            Ac_oil = 0.15
+            Wp_oil = 2.00
+
+            Ap_oil = (100 - Wp_oil) / 100
+            Qri_oil = Qgi_oil * (100 - Wp_oil - Ap_oil) / 100 - 0.025 * Wp_oil
+
+            avun_oil = 1
+
+            ktv_oil = math.pow(10, 6) / Qri_oil * avun_oil * Ap_oil / 100 * (1 - nzu)
+            Etv_oil = math.pow(10, -6) * ktv_oil * Qri_oil * oil
+
+            ktv_gas = 0
+            Etv_gas = 0
+
+            results = {
+                'ktv_coal': round(ktv_coal, 2),
+                'Etv_coal': round(Etv_coal, 2),
+                'ktv_oil': round(ktv_oil, 2),
+                'Etv_oil': round(Etv_oil, 2),
+                'ktv_gas': ktv_gas,
+                'Etv_gas': Etv_gas
+            }
+
+        except Exception as e:
+            return abort(400, f"Bad values: {e}")
+
+        return render_template("prac_2_task_1.html", results=results)
+
+    return render_template("prac_2_task_1.html", results=None)
 
 
 if __name__ == '__main__':
