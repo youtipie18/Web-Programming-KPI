@@ -1,4 +1,6 @@
 import math
+import statistics
+from utils import *
 
 from flask import Flask, render_template, abort, request
 
@@ -206,6 +208,174 @@ def prac_2_task_1():
         return render_template("prac_2_task_1.html", results=results)
 
     return render_template("prac_2_task_1.html", results=None)
+
+
+@app.route("/prac-3/task-1", methods=["GET", "POST"])
+def prac_3_task_1():
+    # Отримуємо значення по змовчуванню для таблиці (Значення з контрольного прикладу)
+    with open("instance/prac_3_table_default_data.json", "r", encoding="UTF-8") as file:
+        default_values = json.load(file)
+
+    if request.method == "POST":
+        try:
+            # Отримуємо користувацький ввід для ЕП першого ШР
+            nu_list = list(map(custom_float, request.form.getlist("nu[]")))
+            cos_list = list(map(custom_float, request.form.getlist("cos[]")))
+            Uh_list = list(map(custom_float, request.form.getlist("Uh[]")))
+            n_list = list(map(custom_float, request.form.getlist("n[]")))
+            Ph_list = list(map(custom_float, request.form.getlist("Ph[]")))
+            KB_list = list(map(custom_float, request.form.getlist("KB[]")))
+            tg_list = list(map(custom_float, request.form.getlist("tg[]")))
+
+            # Шукаємо розрахункові струми на І рівні електропостачання
+            nPh_list = [int(n_list[i] * Ph_list[i]) for i in range(len(nu_list))]
+            # Знаходимо розрахунковий струм кожного ЕП
+            Ip_list = [round(nPh_list[i] / (math.sqrt(3) * Uh_list[i] * cos_list[i] * nu_list[i]), 2) for i in
+                       range(len(nu_list))]
+
+            # Знаходимо груповий коефіцієнт використання
+            nPhKB_list = [round(n_list[i] * Ph_list[i] * KB_list[i], 2) for i in range(len(nu_list))]
+            group_use_coff = round(sum(nPhKB_list) / sum(nPh_list), 1)
+
+            # Знаходимо ефективну кількість ЕП
+            nPh_square_list = [round(n_list[i] * Ph_list[i] ** 2, 2) for i in range(len(nu_list))]
+            ne = math.ceil(sum(nPh_list) ** 2 / sum(nPh_square_list))
+
+            # Знаходимо розрахунковий коефіцієнт активної потужності по таблиці 3.3
+            # за допомогою методу, описаного раніше в utils.py
+            Kp = get_Kp_1(ne, group_use_coff)
+            if not Kp:
+                raise ValueError("Couldn't find corresponding values in data table.")
+
+            # Знаходимо розрахункове активне навантаження
+            Pp = round(Kp * sum(nPhKB_list), 2)
+
+            # Знаходимо розрахункове реактивне навантаження
+            nPhKBtg_list = [round(nPhKB_list[i] * tg_list[i], 2) for i in range(len(nu_list))]
+            Qp = round(sum(nPhKBtg_list) * Kp, 2)
+
+            # Знаходимо повну потужність
+            Sp = round(math.sqrt(Pp ** 2 + Qp ** 2), 2)
+            # Знаходимо розрахунковий груповий струм ШР1
+            Ip = round(Pp / statistics.mean(Uh_list), 2)
+
+            # Отримуємо користувацький ввід для крупних ЕП
+            nu_big_list = list(map(custom_float, request.form.getlist("nu_big[]")))
+            cos_big_list = list(map(custom_float, request.form.getlist("cos_big[]")))
+            Uh_big_list = list(map(custom_float, request.form.getlist("Uh_big[]")))
+            n_big_list = list(map(custom_float, request.form.getlist("n_big[]")))
+            Ph_big_list = list(map(custom_float, request.form.getlist("Ph_big[]")))
+            KB_big_list = list(map(custom_float, request.form.getlist("KB_big[]")))
+            tg_big_list = list(map(custom_float, request.form.getlist("tg_big[]")))
+
+            # Розрахунки ті ж самі, що і для звичайних ЕП
+            nPh_big_list = [int(n_big_list[i] * Ph_big_list[i]) for i in range(len(nu_big_list))]
+            nPhKB_big_list = [round(n_big_list[i] * Ph_big_list[i] * KB_big_list[i], 2) for i in
+                              range(len(nu_big_list))]
+            # Для другого ЕП відсутнє значення коефіцієнту реактивної потужності відсутнє,
+            # тому замість нього пишемо 0 (Це ніяк не вплине на розрахунки, зроблено тільки для зручності
+            nPhKBtg_big_list = [round(nPhKB_big_list[i] * tg_big_list[i] if i < len(tg_big_list) else 0, 2) for i in
+                                range(len(nu_big_list))]
+            nPh_square_big_list = [round(n_big_list[i] * Ph_big_list[i] ** 2, 2) for i in range(len(nu_big_list))]
+            Ip_big_list = [
+                round(nPh_big_list[i] / (math.sqrt(3) * Uh_big_list[i] * cos_big_list[i] * nu_big_list[i]), 2) for i in
+                range(len(nu_big_list))]
+
+            # Отримуємо користувацький ввід загального навантаження цеху
+            n_all = float(request.form.get("n").replace(",", "."))
+            nPh_all = float(request.form.get("nPh").replace(",", "."))
+            nPhKB_all = float(request.form.get("nPhKB").replace(",", "."))
+            nPhKBtg_all = float(request.form.get("nPhKBtg").replace(",", "."))
+            nPh_square_all = float(request.form.get("nPh_square").replace(",", "."))
+
+            # Знаходимо коефіцієнти використання цеху в цілому
+            group_use_coff_all = round(nPhKB_all / nPh_all, 2)
+            # Знаходимо ефективну кількість ЕП цеху в цілому
+            ne_all = round(nPh_all ** 2 / nPh_square_all)
+            # Знаходимо розрахунковий коефіцієнт активної потужності по таблиці 3.4
+            # за допомогою методу, описаного раніше в utils.py
+            Kp_all = get_Kp_2(ne_all, group_use_coff_all)
+            # Знаходимо розрахункове активне навантаження на шинах 0,38 кВ ТП
+            Pp_all = round(Kp_all * nPhKB_all, 2)
+            # Знаходимо розрахункове реактивне навантаження на шинах 0,38 кВ ТП
+            Qp_all = round(Kp_all * nPhKBtg_all, 2)
+            # Знаходимо повну потужність на шинах 0,38 кВ ТП
+            Sp_all = round(math.sqrt(Pp_all ** 2 + Qp_all ** 2), 2)
+            # Знаходимо розрахунковий груповий струм на шинах 0,38 кВ ТП
+            Ip_all = round(Pp_all / statistics.mean(Uh_big_list), 2)
+
+            # Заносимо усі результати у список
+            results = {
+                "nPh_list": nPh_list,
+                "Ip_list": Ip_list,
+                "nPhKB_list": nPhKB_list,
+                "group_use_coff": group_use_coff,
+                "nPh_square_list": nPh_square_list,
+                "ne": ne,
+                "Kp": Kp,
+                "Pp": Pp,
+                "nPhKBtg_list": nPhKBtg_list,
+                "Qp": Qp,
+                "Sp": Sp,
+                "Ip": Ip,
+                "N": int(sum(n_list)),
+                "nPh_sum": int(sum(nPh_list)),
+                "nPhKB_sum": sum(nPhKB_list),
+                "nPhKBtg_sum": round(sum(nPhKBtg_list), 2),
+                "nPh_square_sum": sum(nPh_square_list),
+                "nPh_big_list": nPh_big_list,
+                "nPhKB_big_list": nPhKB_big_list,
+                "nPhKBtg_big_list": nPhKBtg_big_list,
+                "nPh_square_big_list": nPh_square_big_list,
+                "Ip_big_list": Ip_big_list,
+                "group_use_coff_all": group_use_coff_all,
+                "ne_all": ne_all,
+                "Kp_all": Kp_all,
+                "Pp_all": Pp_all,
+                "Qp_all": Qp_all,
+                "Sp_all": Sp_all,
+                "Ip_all": Ip_all
+            }
+
+            # Також створюємо список, який позначає користувацьки ввід
+            # Це створено для того, щоб після розрахунків, значення введені користувачем, лишились
+            user_values = {
+                "normal": {
+                    "naming": default_values.get("normal").get("naming"),
+                    "nu[]": nu_list,
+                    "cos[]": cos_list,
+                    "Uh[]": Uh_list,
+                    "n[]": n_list,
+                    "Ph[]": Ph_list,
+                    "KB[]": KB_list,
+                    "tg[]": tg_list
+                },
+                "big": {
+                    "naming": default_values.get("big").get("naming"),
+                    "nu[]": nu_big_list,
+                    "cos[]": cos_big_list,
+                    "Uh[]": Uh_big_list,
+                    "n[]": n_big_list,
+                    "Ph[]": Ph_big_list,
+                    "KB[]": KB_big_list,
+                    "tg[]": tg_big_list
+                },
+                "all": {
+                    "n": n_all,
+                    "nPh": nPh_all,
+                    "nPhKB": nPhKB_all,
+                    "nPhKBtg": nPhKBtg_all,
+                    "nPh_square": nPh_square_all
+                }
+            }
+        except Exception as e:
+            return abort(400, f"Bad values: {e}")
+
+        # Рендеримо сторінку разом з результатами обрахунків
+        return render_template("prac_3_task_1.html", default_values=user_values, results=results,
+                               get_result_by_index=get_result_by_index)
+    return render_template("prac_3_task_1.html", default_values=default_values, results={},
+                           get_result_by_index=get_result_by_index)
 
 
 if __name__ == '__main__':

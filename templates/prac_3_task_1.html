@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+<!-- Спадкування від базового шаблону -->
+
+{% block head %}
+<title>Task 1</title>
+{% endblock %}
+
+{% block content %}
+<!-- Вміст головної сторінки -->
+
+
+<div class="pt-5 text-center">
+    <h1>Вітаємо у веб калькуляторі!</h1>
+    <h4>Цей калькулятор здатен: розраховувати електричні навантаження об’єктів з використанням методу впорядкованих
+        діаграм.</h4>
+
+    <!-- Створення форми для введення даних -->
+    <form class="mt-5" method="post">
+        <!--        <div class="d-flex justify-content-center align-items-center">-->
+        <div class="table-responsive">
+            <table class="table table-sm ms-4 me-4">
+                <!-- Створюємо заголовки таблиці -->
+                <thead>
+                <tr>
+                    <th>Підрозділи</th>
+                    <th>Найменування ЕП</th>
+                    <th>η<sub>н</sub></th>
+                    <th>cos φ</th>
+                    <th>U<sub>н</sub>, кВ</th>
+                    <th>n, шт</th>
+                    <th>P<sub>н</sub>, кВт</th>
+                    <th>n⋅P<sub>н</sub>, кВт</th>
+                    <th>К<sub>В</sub></th>
+                    <th>tg φ</th>
+                    <th>n⋅P<sub>н</sub>⋅К<sub>В</sub>, кВт</th>
+                    <th>n⋅P<sub>н</sub>⋅К<sub>В</sub>⋅tg φ, квар</th>
+                    <th>n⋅P<sub>н</sub><sup>2</sup></th>
+                    <th>n<sup>e</sup></th>
+                    <th>K<sub>p</sub></th>
+                    <th>P<sub>p</sub>, кВт</th>
+                    <th>Q<sub>p</sub>, квар</th>
+                    <th>S<sub>p</sub>, кВт⋅А</th>
+                    <th>I<sub>p</sub>, А</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Тут у циклі створюємо рядки, що відповідають за ШР1 -->
+                {% for i in range(default_values.get("normal").get("naming")|length) %}
+                <tr>
+                    {% if i == 0 %}
+                    <td rowspan="8">ШР 1</td>
+                    {% endif %}
+
+                    <!-- Уся таблиця заповнюється значеннями по замовчуванню,
+                    які взято з таблиці з контрольного прикладу. Самі дані зберігаються у json файлі.
+                    Таким чином ми можемо швиденько створити усі рядки у циклі та не писати тонни строк коду,
+                    що буде повторюватись -->
+                    <td>{{ default_values.get('normal').get('naming')[i] }}</td>
+                    <td><input name="nu[]" class="form-control" value="{{default_values.get('normal').get('nu[]')[i]}}"
+                               required></td>
+                    <td><input name="cos[]" class="form-control"
+                               value="{{default_values.get('normal').get('cos[]')[i]}}" required>
+                    </td>
+                    <td><input name="Uh[]" class="form-control" value="{{default_values.get('normal').get('Uh[]')[i]}}"
+                               required></td>
+                    <td><input name="n[]" class="form-control" value="{{default_values.get('normal').get('n[]')[i]}}"
+                               required></td>
+                    <td><input name="Ph[]" class="form-control" value="{{default_values.get('normal').get('Ph[]')[i]}}"
+                               required></td>
+                    <td class="text-danger">{{ get_result_by_index("nPh_list", i, results) }}</td>
+                    <td><input name="KB[]" class="form-control" value="{{default_values.get('normal').get('KB[]')[i]}}"
+                               required></td>
+                    <td><input name="tg[]" class="form-control" value="{{default_values.get('normal').get('tg[]')[i]}}"
+                               required></td>
+                    <!-- Результати отримуємо за допомогою раніше створено методу у файлі utils.py -->
+                    <td class="text-danger">{{ get_result_by_index("nPhKB_list", i, results) }}</td>
+                    <td class="text-danger">{{ get_result_by_index("nPhKBtg_list", i, results) }}</td>
+                    <td class="text-danger">{{ get_result_by_index("nPh_square_list", i, results) }}</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td class="text-danger">{{ get_result_by_index("Ip_list", i, results) }}</td>
+                </tr>
+                {% endfor %}
+                <!-- За умовою усі ШР - однакові,
+                тому можемо просто три рази продублювати рядок таблиці -->
+                {% for i in range(3) %}
+                <tr>
+                    <td colspan="2">ВСЬОГО ШР{{i+1}}</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <!-- Тут отримуємо результати зі словника напряму,
+                    оскільки на цей раз ми отримуємо тільки одне число, а не цілий список -->
+                    <td class="text-danger">{{ results.get("N", "???") }}</td>
+                    <td>-</td>
+                    <td class="text-danger">{{ results.get("nPh_sum", "???") }}</td>
+                    <td class="text-danger">{{ results.get("group_use_coff", "???") }}</td>
+                    <td>-</td>
+                    <td class="text-danger">{{ results.get("nPhKB_sum", "???") }}</td>
+                    <td class="text-danger">{{ results.get("nPhKBtg_sum", "???") }}</td>
+                    <td class="text-danger">{{ results.get("nPh_square_sum", "???") }}</td>
+                    <td class="text-danger">{{ results.get("ne", "???") }}</td>
+                    <td class="text-danger">{{ results.get("Kp", "???") }}</td>
+                    <td class="text-danger">{{ results.get("Pp", "???") }}</td>
+                    <td class="text-danger">{{ results.get("Qp", "???") }}</td>
+                    <td class="text-danger">{{ results.get("Sp", "???") }}</td>
+                    <td class="text-danger">{{ results.get("Ip", "???") }}</td>
+                </tr>
+                {% endfor %}
+                <!-- Для крупних ЕП усе так само як і для ШР1.
+                Тільки дані зберігаємо окремо від ЕП для ШР1 (Для зручності розрахунків) -->
+                {% for i in range(default_values.get("big").get("naming")|length) %}
+                <tr>
+                    {% if i == 0 %}
+                    <td rowspan="2">Крупні ЕП, що живляться від ТП (трансформаторної підстанції)</td>
+                    {% endif %}
+                    <td>{{ default_values.get('big').get('naming')[i] }}</td>
+                    <td><input name="nu_big[]" class="form-control" value="{{default_values.get('big').get('nu[]')[i]}}"
+                               required></td>
+                    <td><input name="cos_big[]" class="form-control"
+                               value="{{default_values.get('big').get('cos[]')[i]}}" required>
+                    </td>
+                    <td><input name="Uh_big[]" class="form-control" value="{{default_values.get('big').get('Uh[]')[i]}}"
+                               required></td>
+                    <td><input name="n_big[]" class="form-control" value="{{default_values.get('big').get('n[]')[i]}}"
+                               required></td>
+                    <td><input name="Ph_big[]" class="form-control" value="{{default_values.get('big').get('Ph[]')[i]}}"
+                               required></td>
+                    <td class="text-danger">{{ get_result_by_index("nPh_big_list", i, results) }}</td>
+                    <td><input name="KB_big[]" class="form-control" value="{{default_values.get('big').get('KB[]')[i]}}"
+                               required></td>
+                    <!-- За умовою другий крупний ЕП не має значення для коефіцієнту реактивної потужності,
+                    тому коли будуть заповнюватись дані для другого ЕП - це значення відсутнє -->
+                    {% if i == 0 %}
+                    <td><input name="tg_big[]" class="form-control" value="{{default_values.get('big').get('tg[]')[i]}}"
+                               required></td>
+                    {% else %}
+                    <td>{{ default_values.get('big').get('tg[]')[i] }}</td>
+                    {% endif %}
+                    <td class="text-danger">{{ get_result_by_index("nPhKB_big_list", i, results) }}</td>
+                    <!-- Так само і для виразу n⋅Pн⋅КВ⋅tgφ -->
+                    {% if get_result_by_index("nPhKBtg_big_list", i, results) == 0 %}
+                    <td>-</td>
+                    {% else %}
+                    <td class="text-danger">{{ get_result_by_index("nPhKBtg_big_list", i, results) }}</td>
+                    {% endif %}
+                    <td class="text-danger">{{ get_result_by_index("nPh_square_big_list", i, results) }}</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td class="text-danger">{{ get_result_by_index("Ip_big_list", i, results) }}</td>
+                </tr>
+                {% endfor %}
+                <!-- Для загального навантаження цеху усе аналогічно як і з іншими рядками таблиці -->
+                <tr>
+                    <td colspan="2">Всього, навантаження цеху</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td><input name="n" class="form-control" value="{{default_values.get('all').get('n')}}" required>
+                    </td>
+                    <td>-</td>
+                    <td><input name="nPh" class="form-control" value="{{default_values.get('all').get('nPh')}}"
+                               required></td>
+                    <td class="text-danger">{{ results.get("group_use_coff_all", "???") }}</td>
+                    <td>-</td>
+                    <td><input name="nPhKB" class="form-control" value="{{default_values.get('all').get('nPhKB')}}"
+                               required></td>
+                    <td><input name="nPhKBtg" class="form-control" value="{{default_values.get('all').get('nPhKBtg')}}"
+                               required></td>
+                    <td><input name="nPh_square" class="form-control"
+                               value="{{default_values.get('all').get('nPh_square')}}" required></td>
+                    <td class="text-danger">{{ results.get("ne_all", "???") }}</td>
+                    <td class="text-danger">{{ results.get("Kp_all", "???") }}</td>
+                    <td class="text-danger">{{ results.get("Pp_all", "???") }}</td>
+                    <td class="text-danger">{{ results.get("Qp_all", "???") }}</td>
+                    <td class="text-danger">{{ results.get("Sp_all", "???") }}</td>
+                    <td class="text-danger">{{ results.get("Ip_all", "???") }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <br>
+        <button type="submit" class="btn btn-lg btn-success">Розрахувати!</button>
+    </form>
+</div>
+{% endblock %}
