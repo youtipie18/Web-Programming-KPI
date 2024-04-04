@@ -80,3 +80,27 @@ def get_Kp_2(ne, group_use_coff):
 # (Зроблено для того, щоб легко можна було перетворити користувацький ввід)
 def custom_float(str_float: str):
     return float(str_float.replace(",", "."))
+
+
+# Метод, що читає дані про кабеля з файлу
+# та повертає відповідне значення економічної густини струму
+def get_jek(index, Tm):
+    with open("instance/prac_4_cabels_data.json", "r") as file:
+        data = json.load(file)
+        # Перевіряємо кількість годин використання
+        if 1000 <= Tm <= 3000:
+            return data.get("1000-3000")[index]
+        elif 3000 < Tm <= 5000:
+            return data.get("3000-5000")[index]
+        elif 5000 < Tm:
+            return data.get("5000+")[index]
+        else:
+            return None
+
+
+# Метод, що "заокруглює" значення перерізу кабеля
+def get_cross_section(value):
+    cross_sections = [10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240]  # Допустимі значення перерезів кабелів
+    # Шукаємо найближче
+    closest = min(cross_sections, key=lambda x: abs(x - value))
+    return closest

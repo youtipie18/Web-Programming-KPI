@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+<!-- Спадкування від базового шаблону -->
+
+{% block head %}
+<title>Task 1</title>
+{% endblock %}
+
+{% block content %}
+<!-- Вміст головної сторінки -->
+
+<div class="pt-5 text-center">
+    <h1>Вітаємо у веб калькуляторі!</h1>
+    <h4>Цей калькулятор здатен: розраховувати струму трифазного КЗ, струму однофазного КЗ, та перевіряти на термічну та
+        динамічну стійкість у складі.</h4>
+
+    <!-- Створення форми для введення даних -->
+    <form class="mt-5" method="post">
+        <h1>Введіть дані:</h1>
+
+        <!-- Введення даних для кожного вхідного значення -->
+        <div class="input-container mx-auto" style="max-width: 30rem;">
+
+            <!-- Поле для введення даних
+             Інші поля виглядають так само, змінюється тільки назва поля -->
+            <div class="input-group mt-3 mb-3">
+                <label class="input-group-text fs-4 me-2">I<sup>к</sup>, A</label>
+                <input type="text" name="Ik" class="form-control" placeholder="Введіть значення..." aria-label="Hp"
+                       value="{{ default_values.get('Ik') }}"
+                       required>
+                <!-- Значення за змовчуванням беремо з масива, що передається до шаблону -->
+            </div>
+
+            <!-- Поле для вибору кабеля -->
+            <div class="input-group mt-3 mb-3">
+                <label class="input-group-text fs-4 me-2">Кабель</label>
+                <select name="cabel" class="form-select" required>
+                    <!-- Перелік опцій для вибору кабеля. Значення value означає індекс кабеля у json об'єкті -->
+                    <option value="">Оберіть тип кабеля</option>
+                    <option value="0">Мідні неізольовані проводи та шини</option>
+                    <option value="1">Алюмінієві неізольовані проводи та шини</option>
+                    <option value="2">Кабелі з паперовою і проводи з гумовою та полівінілхлоридною ізоляцією з мідними
+                        жилами
+                    </option>
+                    <option value="3">Кабелі з паперовою і проводи з гумовою та полівінілхлоридною ізоляцією з
+                        алюмінієвими жилами
+                    </option>
+                    <option value="4">Кабелі з гумовою та пластмасовою ізоляцією з мідними жилами</option>
+                    <option value="5">Кабелі з гумовою та пластмасовою ізоляцією з алюмінієвими жилами</option>
+                </select>
+            </div>
+
+            <div class="input-group mt-3 mb-3">
+                <label class="input-group-text fs-4 me-2">t<sup>ф</sup>, с</label>
+                <input type="text" name="tf" class="form-control" placeholder="Введіть значення..." aria-label="Hp"
+                       value="{{ default_values.get('tf') }}"
+                       required>
+            </div>
+
+            <div class="input-group mt-3 mb-3">
+                <label class="input-group-text fs-4 me-2">S<sup>М</sup>, кВ*А</label>
+                <input type="text" name="Sm" class="form-control" placeholder="Введіть значення..." aria-label="Hp"
+                       value="{{ default_values.get('Sm') }}"
+                       required>
+            </div>
+
+            <div class="input-group mt-3 mb-3">
+                <label class="input-group-text fs-4 me-2">T<sup>М</sup>, год</label>
+                <input type="text" name="Tm" class="form-control" placeholder="Введіть значення..." aria-label="Hp"
+                       value="{{ default_values.get('Tm') }}"
+                       required>
+            </div>
+
+            <div class="input-group mt-3 mb-3">
+                <label class="input-group-text fs-4 me-2">S<sup>к</sup>, МВ*А</label>
+                <input type="text" name="Sk" class="form-control" placeholder="Введіть значення..." aria-label="Hp"
+                       value="{{ default_values.get('Sk') }}"
+                       required>
+            </div>
+        </div>
+
+        <br>
+        <button type="submit" class="btn btn-lg btn-success">Розрахувати!</button>
+    </form>
+
+    <!-- Виведення результатів, якщо користувач надіслав дані за допомогою форми -->
+    {% if results %}
+    <h1>Результати:</h1>
+    <span class="d-block fs-4">1.1 Розрахунковий струм для нормального режиму: {{ results.get("Im") }} A.
+        Для післяаварійного режиму: {{ results.get("Im_pa") }} A;</span>
+    <span class="d-block fs-4">1.2 Економічний переріз становить: {{ results.get("sek") }}.
+        Переріз жил кабеля: {{ results.get("s") }};</span>
+    <span class="d-block fs-4">2. Початкове діюче значення струму трифазного КЗ становить:
+        {{ results.get("Ip0") }} кА;</span>
+    <span class="d-block fs-4">3.1 Струми трифазного та двофазного КЗ на шинах 10 кВ в нормальному та
+        мінімальному режимах, приведені до напруги 110 кВ:</span>
+    <span class="d-block fs-4">I<sub>ш</sub><sup>(3)</sup>={{ results.get("Ish_3") }} A;</span>
+    <span class="d-block fs-4">I<sub>ш</sub><sup>(2)</sup>={{ results.get("Ish_2") }} A;</span>
+    <span class="d-block fs-4">I<sub>ш.min</sub><sup>(3)</sup>={{ results.get("Ish_min_3") }} A;</span>
+    <span class="d-block fs-4">I<sub>ш.min</sub><sup>(2)</sup>={{ results.get("Ish_min_2") }} A;</span>
+    <span class="d-block fs-4">3.2 Дійсні струми трифазного та двофазного КЗ на шинах 10 кВ в нормальному
+        та мінімальному режимах:</span>
+    <span class="d-block fs-4">I<sub>ш.н</sub><sup>(3)</sup>={{ results.get("Ishn_3") }} A;</span>
+    <span class="d-block fs-4">I<sub>ш.н</sub><sup>(2)</sup>={{ results.get("Ishn_2") }} A;</span>
+    <span class="d-block fs-4">I<sub>ш.н.min</sub><sup>(3)</sup>={{ results.get("Ishn_min_3") }} A;</span>
+    <span class="d-block fs-4">I<sub>ш.н.min</sub><sup>(2)</sup>={{ results.get("Ishn_min_2") }} A;</span>
+    <span class="d-block fs-4">3.3 Струми короткого замикання:</span>
+    <span class="d-block fs-4">I<sub>л.н</sub><sup>(3)</sup>={{ results.get("Iln_3") }} A;</span>
+    <span class="d-block fs-4">I<sub>л.н</sub><sup>(2)</sup>={{ results.get("Iln_2") }} A;</span>
+    <span class="d-block fs-4">I<sub>л.н.min</sub><sup>(3)</sup>={{ results.get("Iln_min_3") }} A;</span>
+    <span class="d-block fs-4">I<sub>л.н.min</sub><sup>(2)</sup>={{ results.get("Iln_min_2") }} A;</span>
+    {% endif %}
+</div>
+{% endblock %}

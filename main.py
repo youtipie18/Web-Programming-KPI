@@ -378,6 +378,153 @@ def prac_3_task_1():
                            get_result_by_index=get_result_by_index)
 
 
+@app.route("/prac-4/task-1", methods=["GET", "POST"])
+def prac_4_task_1():
+    if request.method == "POST":
+        try:
+            # Отримання користувацього вводу
+            # Також заміняємо ',' на '.' для коректного переведення строки у float
+            cabel = int(request.form.get("cabel"))
+            Ik = float(request.form.get("Ik").replace(",", "."))
+            tf = float(request.form.get("tf").replace(",", "."))
+            Sm = float(request.form.get("Sm").replace(",", "."))
+            Tm = float(request.form.get("Tm").replace(",", "."))
+            Sk = float(request.form.get("Sk").replace(",", "."))
+
+            # 1
+            # Розрахунковий струм для нормального і післяаварійного режимів
+            Im = (Sm / 2) / (math.sqrt(3) * 10)
+            Im_pa = 2 * Im
+            # Отримуємо економічну густину струму
+            jek = get_jek(cabel, Tm)
+            # Рахуємо економічний переріз
+            sek = Im / jek
+            # Шукаємо мінімальний переріз
+            s_min = (Ik * math.sqrt(tf)) / 92
+            # На основі мінімального перерізу шукаємо кабель з потрібним перерізом
+            s = get_cross_section(s_min)
+
+            # 2
+            # Рауємо опори елементів
+            Xc = 10.5 ** 2 / Sk
+            Xt = (10.5 / 100) * (10.5 ** 2 / 6.3)
+            # Сумарний опір
+            Xe = Xc + Xt
+            # Початкове діюче значення струму трифазного КЗ
+            Ip0 = 10.5 / (math.sqrt(3) * Xe)
+
+            # 3
+            # Сталі дані, передані з підстанції
+            Rcn = 10.65
+            Xcn = 24.02
+            Rcmin = 34.88
+            Xcmin = 65.68
+            Uk_max = 11.1
+            Uvn = 115
+            Unn = 11
+            Snomt = 6.3
+
+            # Розрахуємо реактивний опір силового трансформатора
+            Xt = (Uk_max * Uvn ** 2) / (100 * Snomt)
+            # Розрахуємо опори на шинах 10 кВ в нормальному та мінімальному режимах,
+            # що приведені до напруги 110 кВ
+            Rsh = Rcn
+            Xsh = Xcn + Xt
+            Zsh = math.sqrt(Rsh ** 2 + Xsh ** 2)
+            Rshmin = Rcmin
+            Xshmin = Xcmin + Xt
+            Zshmin = math.sqrt(Rshmin ** 2 + Xshmin ** 2)
+            # Розраховуємо струми трифазного та двофазного КЗ на шинах 10 кВ
+            # в нормальному та мінімальному режимах, приведені до напруги 110 кВ
+            Ish_3 = (Uvn * 10 ** 3) / (math.sqrt(3) * Zsh)
+            Ish_2 = Ish_3 * math.sqrt(3) / 2
+            Ish_min_3 = (Uvn * 10 ** 3) / (math.sqrt(3) * Zshmin)
+            Ish_min_2 = Ish_min_3 * math.sqrt(3) / 2
+            # Розраховуємо коефіцієнт приведення для визначення дійсних струмів на шинах 10 кВ
+            kpr = Unn ** 2 / Uvn ** 2
+            # Розраховуємо опори на шинах 10 кВ в нормальному
+            # та мінімальному режимах і заносимо їх в карту вставок
+            Rshn = Rsh * kpr
+            Xshn = Xsh * kpr
+            Zshn = math.sqrt(Rshn ** 2 + Xshn ** 2)
+            Rshn_min = Rshmin * kpr
+            Xshn_min = Xshmin * kpr
+            Zshn_min = math.sqrt(Rshn_min ** 2 + Xshn_min ** 2)
+            # Розраховуємо дійсні струми трифазного та двофазного КЗ
+            # на шинах 10 кВ в нормальному та мінімальному режимах
+            Ishn_3 = (Unn * 10 ** 3) / (math.sqrt(3) * Zshn)
+            Ishn_2 = Ishn_3 * math.sqrt(3) / 2
+            Ishn_min_3 = (Unn * 10 ** 3) / (math.sqrt(3) * Zshn_min)
+            Ishn_min_2 = Ishn_min_3 * math.sqrt(3) / 2
+
+            # Розрахунок струмів короткого замикання відхідних ліній 10 кВ
+            # Сталі дані, передані з підстанції
+            R0 = 0.64
+            X0 = 0.363
+            # Знайдемо резистанси та реактанси відрізка з найбільшим опором,
+            # попередньо знайшовши його довжину
+            Il = 0.2 + 0.35 + 0.2 + 0.6 + 2 + 2.55 + 3.37 + 3.1
+            Rl = Il * R0
+            Xl = Il * X0
+            # Розрахуємо опори в нормальному та мінімальному режимах
+            Ren = Rl + Rshn
+            Xen = Xl + Xshn
+            Zen = math.sqrt(Ren ** 2 + Xen ** 2)
+            Ren_min = Rl + Rshn_min
+            Xen_min = Xl + Xshn_min
+            Zen_min = math.sqrt(Ren_min ** 2 + Xen_min ** 2)
+            # Розрахуємо струми трифазного і двофазного КЗ
+            # в нормальному та мінімальному режимах:
+            Iln_3 = (Unn * 10 ** 3) / (math.sqrt(3) * Zen)
+            Iln_2 = Iln_3 * math.sqrt(3) / 2
+            Iln_min_3 = (Unn * 10 ** 3) / (math.sqrt(3) * Zen_min)
+            Iln_min_2 = Iln_min_3 * math.sqrt(3) / 2
+
+            # Заносимо усі результати у список
+            results = {
+                "sek": round(sek, 2),
+                "s": s,
+                "Im": round(Im, 2),
+                "Im_pa": round(Im_pa, 2),
+                "Ip0": round(Ip0, 2),
+                "Ish_3": round(Ish_3, 2),
+                "Ish_2": round(Ish_2, 2),
+                "Ish_min_3": round(Ish_min_3, 2),
+                "Ish_min_2": round(Ish_min_2, 2),
+                "Ishn_3": round(Ishn_3, 2),
+                "Ishn_2": round(Ishn_2, 2),
+                "Ishn_min_3": round(Ishn_min_3, 2),
+                "Ishn_min_2": round(Ishn_min_2, 2),
+                "Iln_3": round(Iln_3, 2),
+                "Iln_2": round(Iln_2, 2),
+                "Iln_min_3": round(Iln_min_3, 2),
+                "Iln_min_2": round(Iln_min_2, 2),
+            }
+
+            # Також створюємо список, який позначає користувацьки ввід
+            # Це створено для того, щоб після розрахунків, значення введені користувачем, лишились
+            default_values = {
+                "Ik": Ik,
+                "tf": tf,
+                "Sm": Sm,
+                "Tm": Tm,
+                "Sk": Sk
+            }
+
+        except Exception as e:
+            return abort(400, f"Bad values: {e}")
+
+        # Рендеримо сторінку разом з результатами обрахунків
+        return render_template("prac_4_task_1.html", default_values=default_values, results=results)
+    return render_template("prac_4_task_1.html", default_values={
+        "Ik": 2500,
+        "tf": 2.5,
+        "Sm": 1300,
+        "Tm": 4000,
+        "Sk": 200
+    })
+
+
 if __name__ == '__main__':
     # Запуск локального веб-серверу
     # Параметр debug встановлено на True,
