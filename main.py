@@ -2,7 +2,7 @@ import math
 import statistics
 from utils import *
 
-from flask import Flask, render_template, abort, request
+from flask import Flask, render_template, abort, request, jsonify
 
 app = Flask(__name__)
 # Налаштування секретного ключа для забезпечення безпеки сесій
@@ -523,6 +523,71 @@ def prac_4_task_1():
         "Tm": 4000,
         "Sk": 200
     })
+
+
+# Метод, що дозволяє отримати дані про можливі елементи ЕПС
+@app.route("/prac-5/data")
+def prac_5_data():
+    data = prac_5_read_data()
+    return list(data.keys())
+
+
+@app.route("/prac-5/task-1", methods=["GET", "POST"])
+def prac_5_task_1():
+    # Отримуємо данні про елементи ЕПС
+    data = prac_5_read_data()
+
+    if request.method == "POST":
+        try:
+            # Отримання користувацього вводу
+            quantities = list(map(int, request.form.getlist("quantity[]")))
+            elements = list(request.form.getlist("element[]"))
+            # Розрахуємо частоту відмов одноколової системи
+            woc = sum([quantity * data[element][0] for quantity, element in zip(quantities, elements)])
+            # Розрахуємо середню тривалість відновлення
+            tvoc = sum([quantity * data[element][0] * data[element][1] for quantity, element
+                        in zip(quantities, elements)]) / woc
+            # Коефіцієнт аварійного простою одноколової системи
+            kaoc = (woc * tvoc) / 8760
+            # Коефіцієнт планового простою одноколової системи
+            kpoc = 1.2 * max([data[element][2] for element in elements]) / 8760
+            # Тоді частота відмов одночасно двох кіл двоколової системи
+            wdk = 2 * woc * (kaoc + kpoc)
+            # Отже, частота відмов двоколової системи з урахуванням секційного вимикача
+            wdc = wdk + 0.02
+            # Розрахуємо коефіцієнт, щоб зрозуміти яка система надійніше
+            # к>1 - двоколова система надійніше
+            # к<1 - одноколова система надійніше
+            koef = woc / wdc
+
+            # Отримання користувацього вводу для другого пункту завдання
+            Zpera = float(request.form.get("Zpera").replace(",", "."))
+            Zperp = float(request.form.get("Zperp").replace(",", "."))
+            # Константи
+            w = 0.01
+            tv = 45 * 10 ** (-3)
+            Pm = 5.12 * 10 ** 3
+            Tm = 6451
+            kp = 4 * 10 ** (-3)
+            # Розрахуємо математичне сподівання аварійного та планового недовідпущення електроенергії
+            M_1 = w * tv * Pm * Tm
+            M_2 = kp * Pm * Tm
+            # Тоді можемо розрахувати математичне сподівання збитків від переривання електропостачання
+            M = Zpera * M_1 + Zperp * M_2
+
+            # Заносимо усі результати у список
+            results = {
+                "woc": round(woc, 4),
+                "wdc": round(wdc, 4),
+                "koef": koef,
+                "M": round(M)
+            }
+        except Exception as e:
+            return abort(400, f"Bad values: {e}")
+
+        # Рендеримо сторінку разом з результатами обрахунків
+        return render_template("prac_5_task_1.html", results=results)
+    return render_template("prac_5_task_1.html")
 
 
 if __name__ == '__main__':

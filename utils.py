@@ -104,3 +104,10 @@ def get_cross_section(value):
     # Шукаємо найближче
     closest = min(cross_sections, key=lambda x: abs(x - value))
     return closest
+
+
+# Метод, що читає данні елементів ЕПС
+def prac_5_read_data():
+    with open("instance/prac_5_data.json", "r", encoding="utf-8") as file:
+        data = json.load(file)
+        return data
