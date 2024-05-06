@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+<!-- Спадкування від базового шаблону -->
+
+{% block head %}
+<title>Task 1</title>
+{% endblock %}
+
+{% block content %}
+<!-- Вміст головної сторінки -->
+
+<div class="pt-5 text-center">
+    <h1>Вітаємо у веб калькуляторі!</h1>
+    <h4>Цей калькулятор здатен: розраховувати прибуток від сонячних електростанцій з встановленою системою прогнозування
+        сонячної потужності.</h4>
+
+    <!-- Створення форми для введення даних -->
+    <form class="mt-5" method="post">
+        <h1>Введіть дані:</h1>
+
+        <!-- Введення даних для кожного вхідного значення -->
+        <div class="input-container mx-auto" style="max-width: 40rem;">
+            <!-- Поле для введення даних -->
+            <div class="input-group mt-3 mb-3">
+                <label class="input-group-text fs-4 me-2">P<sub>c</sub>, МВт.</label>
+                <input type="text" name="Pc" class="form-control" placeholder="Введіть значення..." aria-label="Hp"
+                       value="5"
+                       required>
+            </div>
+
+            <!-- Поле для введення даних -->
+            <div class="input-group mt-3 mb-3">
+                <label class="input-group-text fs-4 me-2">σ<sub>1</sub>, МВт.</label>
+                <input type="text" name="Q1" class="form-control" placeholder="Введіть значення..." aria-label="Hp"
+                       value="1"
+                       required>
+            </div>
+
+            <!-- Поле для введення даних -->
+            <div class="input-group mt-3 mb-3">
+                <label class="input-group-text fs-4 me-2">σ<sub>2</sub>, МВт.</label>
+                <input type="text" name="Q2" class="form-control" placeholder="Введіть значення..." aria-label="Hp"
+                       value="0.25"
+                       required>
+            </div>
+
+            <!-- Поле для введення даних -->
+            <div class="input-group mt-3 mb-3">
+                <label class="input-group-text fs-4 me-2">B, грн/кВт⋅год.</label>
+                <input type="text" name="B" class="form-control" placeholder="Введіть значення..." aria-label="Hp"
+                       value="7"
+                       required>
+            </div>
+        </div>
+        <br>
+        <!-- Якщо користувач ввів щось некоректно, то тут з'являться про це повідомлення -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <span style="color: red;">{{ message }}</span>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <br>
+        <button type="submit" class="btn btn-lg btn-success mt-3">Розрахувати!</button>
+    </form>
+
+    <!-- Виведення результатів, якщо користувач надіслав дані за допомогою форми -->
+    {% if results %}
+    <h1>Результати:</h1>
+    <span class="d-block fs-4">1. Прибуток для σ<sub>1</sub>={{ results.get("q1") }} МВт. дорівнює П = {{ results.get("res1") }} тис. грн.</span>
+    <span class="d-block fs-4">2. Прибуток для σ<sub>2</sub>={{ results.get("q2") }} МВт. дорівнює П = {{ results.get("res2") }} тис. грн.</span>
+    {% endif %}
+</div>
+
+<!-- Підвантажуємо скрипт для динамічного додавання елементів ЕПС -->
+<script src="{{url_for('static', filename='js/prac_5.js')}}"></script>
+{% endblock %}

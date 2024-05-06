@@ -2,7 +2,8 @@ import math
 import statistics
 from utils import *
 
-from flask import Flask, render_template, abort, request, jsonify
+from flask import Flask, render_template, abort, request, jsonify, flash, redirect, url_for
+from scipy.integrate import quad
 
 app = Flask(__name__)
 # Налаштування секретного ключа для забезпечення безпеки сесій
@@ -588,6 +589,57 @@ def prac_5_task_1():
         # Рендеримо сторінку разом з результатами обрахунків
         return render_template("prac_5_task_1.html", results=results)
     return render_template("prac_5_task_1.html")
+
+
+@app.route("/prac-6/task1", methods=["POST", "GET"])
+def prac_6_task_1():
+    if request.method == "POST":
+        try:
+            # Отримання користувацього вводу
+            Pc = float(request.form.get("Pc").replace(",", "."))
+            q1 = float(request.form.get("Q1").replace(",", "."))
+            q2 = float(request.form.get("Q2").replace(",", "."))
+            B = float(request.form.get("B").replace(",", "."))
+            # Якщо q2 більше, то це не має сенсу,
+            # тому сповіщаємо користувача про помилку
+            if q2 >= q1:
+                flash("σ2 має бути менше за σ1.")
+                return redirect(url_for("prac_6_task_1"))
+            # Розрахуємо частку енергії, що генерується без небалансу
+            qW1_integral = quad(prac_6_integral, Pc - 0.05 * Pc, Pc + 0.05 * Pc, args=(q1, Pc))
+            qW1 = qW1_integral[0] - qW1_integral[1]
+            # Розрахуємо прибуток за 20% енергії
+            W1 = Pc * 24 * qW1
+            P1 = W1 * B
+            # Розрухємо штраф за 80%
+            W2 = Pc * 24 * (1 - qW1)
+            SH1 = W2 * B
+            res1 = P1 - SH1
+            # Розрахуємо частку енергії, що генерується без небалансу
+            # після вдосконалення системи прогнозу
+            qW2_integral = quad(prac_6_integral, Pc - 0.05 * Pc, Pc + 0.05 * Pc, args=(q2, Pc))
+            qW2 = qW2_integral[0] - qW2_integral[1]
+            # Розрахуємо прибуток за 68%
+            W3 = Pc * 24 * qW2
+            P2 = W3 * B
+            # Розрухємо штраф за 32%
+            W4 = Pc * 24 * (1 - qW2)
+            SH2 = W4 * B
+            res2 = P2 - SH2
+
+            # Заносимо усі результати у список
+            results = {
+                "res1": round(res1, 2),
+                "res2": round(res2, 2),
+                "q1": q1,
+                "q2": q2
+            }
+        except Exception as e:
+            return abort(400, f"Bad values: {e}")
+
+        # Рендеримо сторінку разом з результатами обрахунків
+        return render_template("prac_6_task_1.html", results=results)
+    return render_template("prac_6_task_1.html")
 
 
 if __name__ == '__main__':

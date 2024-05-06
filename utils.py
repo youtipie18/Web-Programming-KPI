@@ -1,5 +1,6 @@
 # Імпортуємо необхідні бібліотеки
 import json
+import math
 
 
 # Метод, щоб знайти найближчі межі до числа у списку(Використовуємо при пошуці Кв)
@@ -111,3 +112,8 @@ def prac_5_read_data():
     with open("instance/prac_5_data.json", "r", encoding="utf-8") as file:
         data = json.load(file)
         return data
+
+
+# Метод, що використовується при інтегруванні
+def prac_6_integral(p, q, Pc):
+    return (1 / (q * math.sqrt(2 * math.pi))) * math.exp(-((p - Pc) ** 2 / (2 * q ** 2)))
